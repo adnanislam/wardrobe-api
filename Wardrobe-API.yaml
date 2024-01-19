@@ -1,0 +1,589 @@
+openapi: 3.1.0
+info:
+  version: 1.0.11
+  title: Wardrobe API
+  description: 'The Wardrobe API enables users to add, update, and delete clothing items in various categories like shirts, pants, and shoes, with the added flexibility to retrieve items using optional attributes such as size, color, and price for efficient wardrobe management.'
+  termsOfService: 'http://example.com/terms/'
+  contact:
+    name: Adnan Islam
+    url: adnanislam.com
+    email: adnansislam@protonmail.com
+  license:
+    url: 'https://creativecommons.org/licenses/by-sa/4.0/'
+    name: Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
+servers:
+  - url: 'http://localhost:3000'
+paths:
+  '/clothes/{id}':
+    get:
+      tags:
+        - clothes
+      summary: Find a clothing item by ID.
+      description: 'Retrieve details of a specific clothing item by its ID. A successful response will include information about the clothing item, such as its ID, name, category, size, color, price, brand, condition, and date added. If an API key is not provided or if an invalid API key is provided, then a `401 Unauthorized` response will be returned. If the specified ID does not exist, then a `404 Not Found` response will be returned.'
+      operationId: get_clothing_item
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          $ref: '#/components/responses/clothing-item'
+        '401':
+          description: Unauthorized
+        '404':
+          $ref: '#/components/responses/clothing-item-not-found'
+      security:
+        - apiKey_1: []
+      servers:
+        - url: 'http://localhost:3000'
+    put:
+      tags:
+        - clothes
+      summary: Update an existing item of clothing.
+      description: |-
+        Update the details of an existing clothing item by providing its ID. The request body should be a JSON object containing optional parameters to update the values of the clothing item. The following attributes can be included in the body:
+        - name
+        - category
+        - size
+        - color
+        - price
+        - brand
+        - condition
+        - date_added
+
+        A successful response will include all details of the updated clothing item. If an API key is not provided or if an invalid API key is provided, then a `401 Unauthorized` response will be returned. If the specified ID does not exist, then a `404 Not Found` response will be returned.
+      operationId: update_clothing_item
+      parameters:
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        $ref: '#/components/requestBodies/update-clothing-item'
+      responses:
+        '200':
+          $ref: '#/components/responses/clothing-item'
+        '401':
+          description: Unauthorized
+        '404':
+          $ref: '#/components/responses/clothing-item-not-found'
+      security:
+        - apiKey_1: []
+      servers:
+        - url: 'http://localhost:3000'
+    delete:
+      tags:
+        - clothes
+      summary: Remove an existing item of clothing.
+      description: 'Delete a clothing item from the wardrobe by providing its ID. If the deletion is successful, the response will have a `204 No Content` status with no additional content. If an API key is not provided or if an invalid API key is provided, then a `401 Unauthorized` response will be returned. If the specified ID does not exist, then a `404 Not Found` response will be returned.'
+      operationId: delete_clothing_item
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '404':
+          $ref: '#/components/responses/clothing-item-not-found'
+      security:
+        - apiKey_1: []
+      servers:
+        - url: 'http://localhost:3000'
+  /clothes:
+    get:
+      tags:
+        - clothes
+      summary: Find multiples clothes.
+      description: |
+        Retrieve a list of clothing items, with optional query parameters to filter results. The parameters can include the following:
+        - id
+        - name
+        - category
+        - size
+        - color
+        - price
+        - brand
+        - condition
+        - date_added
+
+        A successful response will be a list of clothing items matching the specified parameters. If no parameters are specified, then the entire list of clothing items will be retrieved. If an API key is not provided or if an invalid API key is provided, then a `401 Unauthorized` response will be returned.
+      operationId: list_clothes
+      parameters:
+        - name: id
+          in: query
+          description: A unique numerical identifier for each clothing item.
+          schema:
+            type: integer
+            examples:
+              - 16587
+        - name: name
+          in: query
+          description: The descriptive name or title of the clothing item.
+          schema:
+            type: string
+            examples:
+              - Beatles T-shirt
+        - name: category
+          in: query
+          description: The type or style of clothing.
+          schema:
+            type: string
+            enum:
+              - shirts
+              - t-shirts
+              - sweaters
+              - pants
+              - skirts
+              - shorts
+              - jackets
+              - dresses
+              - swimsuits
+              - underwear
+              - shoes
+              - bags
+              - accessories
+            examples:
+              - t-shirts
+        - name: size
+          in: query
+          description: 'The size of the clothing item, indicating its fit or dimensions.'
+          schema:
+            type: string
+            enum:
+              - xs
+              - s
+              - m
+              - l
+              - xl
+            examples:
+              - m
+        - name: color
+          in: query
+          description: The primary color of the clothing item.
+          schema:
+            type: string
+            examples:
+              - black
+        - name: price
+          in: query
+          description: The cost or price associated with purchasing the clothing item in US dollars.
+          schema:
+            type: number
+            format: currency
+            examples:
+              - 19.99
+        - name: brand
+          in: query
+          description: The brand or manufacturer of the clothing item.
+          schema:
+            type: string
+            examples:
+              - Rockmerch
+        - name: condition
+          in: query
+          description: The state or condition of the clothing item.
+          schema:
+            type: string
+            enum:
+              - new
+              - like new
+              - good
+              - fair
+              - poor
+            examples:
+              - new
+        - name: date_added
+          in: query
+          description: The date when the clothing item was added to the wardrobe.
+          schema:
+            type: string
+            format: date
+            examples:
+              - '2023-03-10'
+      responses:
+        '200':
+          $ref: '#/components/responses/list-of-clothing-items'
+        '401':
+          description: Unauthorized
+      security:
+        - apiKey_1: []
+      servers:
+        - url: 'http://localhost:3000'
+    post:
+      tags:
+        - clothes
+      summary: Add a clothing item to the wardrobe.
+      description: |-
+        Add a new clothing item to the wardrobe by providing all necessary details in the request body. The body must include the following:
+        - name
+        - category
+        - size
+        - color
+        - price
+        - brand
+        - condition
+        - date_added
+
+        A successful response will include all details of the newly added clothing item. If an API key is not provided or if an invalid API key is provided, then a `401 Unauthorized` response will be returned. If the request body is missing required parameters or contains invalid values, then a `400 Bad Request` response will be returned.
+      operationId: add_clothing_item
+      requestBody:
+        $ref: '#/components/requestBodies/new-clothing-item'
+      responses:
+        '201':
+          $ref: '#/components/responses/clothing-item'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+      security:
+        - apiKey_1: []
+      servers:
+        - url: 'http://localhost:3000'
+tags:
+  - name: clothes
+    description: Details about all items in the wardrobe.
+components:
+  parameters:
+    id:
+      name: id
+      in: path
+      description: A numerical value that represents the unique identifier for each clothing item.
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+        examples:
+          - 16587
+  requestBodies:
+    update-clothing-item:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The descriptive name or title of the clothing item.
+                examples:
+                  - Beatles T-shirt
+              category:
+                type: string
+                description: The type or style of clothing.
+                examples:
+                  - t-shirts
+              size:
+                type: string
+                description: 'The size of the clothing item, indicating its fit or dimensions.'
+                examples:
+                  - M
+              color:
+                type: string
+                description: The primary color of the clothing item.
+                examples:
+                  - black
+              price:
+                type: number
+                description: The cost or price associated with purchasing the clothing item in US dollars.
+                format: currency
+                examples:
+                  - 19.99
+              brand:
+                type: string
+                description: The brand or manufacturer of the clothing item.
+                examples:
+                  - Rockmerch
+              condition:
+                type: string
+                description: The state or condition of the clothing item.
+                examples:
+                  - new
+              date_added:
+                type: string
+                description: The date when the clothing item was added to the wardrobe.
+                format: date
+                examples:
+                  - '2023-03-10'
+            x-examples:
+              Example 1:
+                name: Beatles T-shirt
+                category: t-shirts
+                size: m
+                color: black
+                price: 19.99
+                brand: Rockmerch
+                condition: used
+    new-clothing-item:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: A unique numerical identifier for each clothing item.
+                examples:
+                  - 16587
+              name:
+                type: string
+                description: The descriptive name or title of the clothing item.
+                examples:
+                  - Beatles T-shirt
+              category:
+                type: string
+                description: The type or style of clothing.
+                examples:
+                  - t-shirts
+              size:
+                type: string
+                description: 'The size of the clothing item, indicating its fit or dimensions.'
+                examples:
+                  - M
+              color:
+                type: string
+                description: The primary color of the clothing item.
+                examples:
+                  - black
+              price:
+                type: number
+                description: The cost or price associated with purchasing the clothing item in US dollars.
+                format: currency
+                examples:
+                  - 19.99
+              brand:
+                type: string
+                description: The brand or manufacturer of the clothing item.
+                examples:
+                  - Rockmerch
+              condition:
+                type: string
+                description: The state or condition of the clothing item.
+                examples:
+                  - new
+              date_added:
+                type: string
+                description: The date when the clothing item was added to the wardrobe.
+                format: date
+                examples:
+                  - '2023-03-10'
+            required:
+              - id
+              - name
+              - category
+              - size
+              - color
+              - price
+              - brand
+              - condition
+              - date_added
+            x-examples:
+              Example 1:
+                id: 16587
+                name: Beatles T-shirt
+                category: t-shirts
+                size: m
+                color: black
+                price: 19.99
+                brand: Rockmerch
+                condition: new
+                date_added: '2023-03-10'
+  securitySchemes:
+    apiKey_1:
+      type: apiKey
+      name: apiKey
+      in: header
+  responses:
+    clothing-item:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: A unique numerical identifier for each clothing item.
+                examples:
+                  - 16587
+              name:
+                type: string
+                description: The descriptive name or title of the clothing item.
+                examples:
+                  - Beatles T-shirt
+              category:
+                type: string
+                description: The type or style of clothing.
+                examples:
+                  - t-shirts
+              size:
+                type: string
+                description: 'The size of the clothing item, indicating its fit or dimensions.'
+                examples:
+                  - M
+              color:
+                type: string
+                description: The primary color of the clothing item.
+                examples:
+                  - black
+              price:
+                type: number
+                description: The cost or price associated with purchasing the clothing item in US dollars.
+                format: currency
+                examples:
+                  - 19.99
+              brand:
+                type: string
+                description: The brand or manufacturer of the clothing item.
+                examples:
+                  - Rockmerch
+              condition:
+                type: string
+                description: The state or condition of the clothing item.
+                examples:
+                  - new
+              date_added:
+                type: string
+                description: The date when the clothing item was added to the wardrobe.
+                format: date
+                examples:
+                  - '2023-03-10'
+            required:
+              - id
+              - name
+              - category
+              - size
+              - color
+              - price
+              - brand
+              - condition
+              - date_added
+            x-examples:
+              Example 1:
+                id: 16587
+                name: Beatles T-shirt
+                category: t-shirts
+                size: m
+                color: black
+                price: 19.99
+                brand: Rockmerch
+                condition: new
+                date_added: '2023-03-10'
+    list-of-clothing-items:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  description: A unique numerical identifier for each clothing item.
+                  examples:
+                    - 16587
+                name:
+                  type: string
+                  description: The descriptive name or title of the clothing item.
+                  examples:
+                    - Beatles T-shirt
+                category:
+                  type: string
+                  description: The type or style of clothing.
+                  examples:
+                    - t-shirts
+                size:
+                  type: string
+                  description: 'The size of the clothing item, indicating its fit or dimensions.'
+                  examples:
+                    - M
+                color:
+                  type: string
+                  description: The primary color of the clothing item.
+                  examples:
+                    - black
+                price:
+                  type: number
+                  description: The cost or price associated with purchasing the clothing item in US dollars.
+                  format: currency
+                  examples:
+                    - 19.99
+                brand:
+                  type: string
+                  description: The brand or manufacturer of the clothing item.
+                  examples:
+                    - Rockmerch
+                condition:
+                  type: string
+                  description: The state or condition of the clothing item.
+                  examples:
+                    - new
+                date_added:
+                  type: string
+                  description: The date when the clothing item was added to the wardrobe.
+                  format: date
+                  examples:
+                    - '2023-03-10'
+              required:
+                - id
+                - name
+                - category
+                - size
+                - color
+                - price
+                - brand
+                - condition
+                - date_added
+            x-examples:
+              Example 1:
+                - id: 16588
+                  name: Athletic t-shirt
+                  category: t-shirts
+                  size: s
+                  color: white
+                  price: 14.99
+                  brand: Nike
+                  condition: new
+                  date_added: '2023-04-05'
+                - id: 16588
+                  name: Baggy jeans
+                  category: pants
+                  size: xl
+                  color: blue
+                  price: 39.99
+                  brand: Levi's
+                  condition: good
+                  date_added: '2023-04-08'
+                - id: 16589
+                  name: Turtleneck sweater
+                  category: sweaters
+                  size: l
+                  color: brown
+                  price: 79.99
+                  brand: Everlane
+                  condition: fair
+                  date_added: '2023-04-12'
+                - id: 16590
+                  name: Running shorts
+                  category: shorts
+                  size: xs
+                  color: yellow
+                  price: 49.99
+                  brand: Adidas
+                  condition: new
+                  date_added: '2023-04-15'
+                - id: 16591
+                  name: Summer dress
+                  category: dresses
+                  size: m
+                  color: green
+                  price: 49.99
+                  brand: Urban Outfitters
+                  condition: good
+                  date_added: '2023-04-20'
+    clothing-item-not-found:
+      description: The clothing item with the specified ID was not found.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+security:
+  - apiKey_1: []
